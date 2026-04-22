@@ -1,1199 +1,559 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Blueprint — AI Hardware Design</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🚀 A1 Savings Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #050a14;
+      --panel: #0a1628;
+      --border: #1a3a5c;
+      --accent: #00d4ff;
+      --accent2: #ff6b35;
+      --green: #00ff88;
+      --text: #c8e6f5;
+      --muted: #4a7a9b;
+    }
 
-<style>
-:root {
-  --bg: #080a0c;
-  --bg2: #0d1014;
-  --surface: #111418;
-  --surface2: #181c21;
-  --surface3: #1e232a;
-  --border: rgba(255,255,255,0.07);
-  --border2: rgba(255,255,255,0.12);
-  --text: #e2e8f0;
-  --text-muted: #7a8899;
-  --text-dim: #3d4a57;
-  --accent: #00d4ff;
-  --accent-glow: rgba(0,212,255,0.15);
-  --accent2: #ff6b35;
-  --accent3: #00ff88;
-  --warn: #ffcc00;
-  --font-mono: 'JetBrains Mono', monospace;
-  --font-display: 'Syne', sans-serif;
-}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-html, body {
-  height: 100%;
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-mono);
-  font-size: 13px;
-  overflow: hidden;
-  -webkit-font-smoothing: antialiased;
-}
+    .stars {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background: 
+        radial-gradient(1px 1px at 10% 20%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 30% 50%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 50% 10%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 70%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 85% 30%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 20% 80%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 60% 90%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 60%, #fff 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 45% 45%, rgba(0,212,255,0.6) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 75% 15%, rgba(0,212,255,0.6) 0%, transparent 100%);
+    }
 
-/* ── LAYOUT ─────────────────────────────── */
-.app {
-  display: grid;
-  grid-template-rows: 52px 1fr;
-  height: 100vh;
-  height: 100dvh;
-}
+    .container {
+      position: relative; z-index: 1;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 24px 16px 60px;
+    }
 
-.topbar {
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-  gap: 16px;
-  z-index: 50;
-}
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+      animation: fadeDown 0.7s ease;
+    }
+    .header .badge {
+      display: inline-block;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--accent);
+      background: rgba(0,212,255,0.1);
+      border: 1px solid rgba(0,212,255,0.3);
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+    .header h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(22px, 6vw, 36px);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.1;
+      text-shadow: 0 0 30px rgba(0,212,255,0.4);
+    }
+    .header h1 span { color: var(--accent); }
+    .header p { margin-top: 8px; font-size: 12px; color: var(--muted); letter-spacing: 1px; }
 
-.logo {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 18px;
-  letter-spacing: -0.03em;
-  color: var(--accent);
-  text-shadow: 0 0 24px var(--accent-glow);
-}
-.logo span { color: var(--text-muted); font-weight: 400; }
+    .launch-pad {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px 24px 24px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+      animation: fadeUp 0.7s ease 0.1s both;
+    }
+    .launch-pad::before {
+      content: '';
+      position: absolute;
+      top: -1px; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
 
-.topbar-status {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 11px; color: var(--text-muted);
-  font-family: var(--font-mono);
-}
-.status-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--accent3);
-  box-shadow: 0 0 6px var(--accent3);
-  animation: breathe 2s ease-in-out infinite;
-}
-@keyframes breathe { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .pct {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--accent);
+      text-shadow: 0 0 20px rgba(0,212,255,0.5);
+    }
+    .goal-text { text-align: right; color: var(--muted); font-size: 10px; line-height: 1.6; letter-spacing: 1px; }
+    .goal-text strong { color: var(--text); font-size: 14px; }
 
-.topbar-spacer { flex:1; }
+    .track-wrap { position: relative; margin-bottom: 6px; }
+    .rocket-emoji {
+      position: absolute;
+      top: -26px;
+      font-size: 26px;
+      transition: left 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+      filter: drop-shadow(0 0 8px rgba(0,212,255,0.8));
+      transform: rotate(45deg);
+      pointer-events: none;
+    }
+    .track {
+      height: 18px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 9px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .fill {
+      height: 100%;
+      border-radius: 9px;
+      background: linear-gradient(90deg, #0066ff, var(--accent), var(--green));
+      transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+      position: relative;
+      box-shadow: 0 0 12px rgba(0,212,255,0.4);
+    }
+    .fill::after {
+      content: '';
+      position: absolute;
+      right: 0; top: 2px; bottom: 2px; width: 6px;
+      background: rgba(255,255,255,0.6);
+      border-radius: 3px;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
 
-.view-tabs {
-  display: flex; gap: 2px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 3px;
-}
-.view-tab {
-  padding: 5px 14px; border-radius: 5px;
-  font-size: 11px; font-weight: 600;
-  letter-spacing: .06em; text-transform: uppercase;
-  cursor: pointer; border: none;
-  color: var(--text-muted); background: none;
-  transition: all .2s; font-family: var(--font-mono);
-}
-.view-tab.active {
-  background: var(--surface3);
-  color: var(--accent);
-  box-shadow: 0 0 0 1px var(--border2);
-}
-.view-tab:hover:not(.active) { color: var(--text); }
+    .amounts {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .amounts .saved-amt { color: var(--green); font-weight: 700; }
+    .amounts .remaining-amt { color: var(--accent2); }
 
-.workspace {
-  display: grid;
-  grid-template-columns: 340px 1fr 280px;
-  overflow: hidden;
-}
+    .milestone-bar {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+      position: relative;
+    }
+    .milestone-bar::before {
+      content: '';
+      position: absolute;
+      top: 10px; left: 10%; right: 10%;
+      height: 1px;
+      background: var(--border);
+    }
+    .milestone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 9px;
+      color: var(--muted);
+      position: relative;
+      z-index: 1;
+      letter-spacing: 1px;
+    }
+    .milestone .dot {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--panel);
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+      transition: all 0.4s;
+    }
+    .milestone.reached .dot { background: var(--green); border-color: var(--green); box-shadow: 0 0 10px var(--green); }
+    .milestone.reached { color: var(--green); }
 
-/* ── LEFT PANEL ──────────────────────────── */
-.panel-left {
-  border-right: 1px solid var(--border);
-  display: flex; flex-direction: column;
-  background: var(--surface);
-  overflow: hidden;
-}
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+      animation: fadeUp 0.7s ease 0.2s both;
+    }
+    .stat-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.3;
+    }
+    .stat-card .label { font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+    .stat-card .value { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; color: #fff; }
+    .stat-card .value.green { color: var(--green); }
+    .stat-card .value.orange { color: var(--accent2); }
+    .stat-card .sub { font-size: 10px; color: var(--muted); margin-top: 3px; }
 
-.panel-header {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
-  font-size: 10px; font-weight: 600;
-  letter-spacing: .12em; text-transform: uppercase;
-  color: var(--text-dim);
-  display: flex; align-items: center; gap: 8px;
-}
-.panel-header-dot {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: var(--accent);
-}
+    .input-section {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      animation: fadeUp 0.7s ease 0.3s both;
+    }
+    .input-section h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: var(--accent);
+      margin-bottom: 16px;
+      text-transform: uppercase;
+    }
+    .input-row { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    .inp-wrap { flex: 1; min-width: 120px; position: relative; }
+    .inp-wrap .rupee {
+      position: absolute;
+      left: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--accent); font-size: 14px; pointer-events: none;
+    }
+    input[type="number"], input[type="text"], input[type="date"], select {
+      width: 100%;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 12px;
+      color: #fff;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .inp-wrap input { padding-left: 28px; }
+    input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(0,212,255,0.15); }
+    input[type="date"] { color-scheme: dark; }
+    select { cursor: pointer; }
 
-/* PROJECT INPUT */
-.project-form {
-  padding: 16px;
-  border-bottom: 1px solid var(--border);
-}
-.form-label {
-  font-size: 10px; font-weight: 600; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px;
-}
-.form-input {
-  width: 100%; background: var(--bg);
-  border: 1px solid var(--border2);
-  border-radius: 8px; padding: 10px 12px;
-  color: var(--text); font-family: var(--font-mono);
-  font-size: 13px; outline: none; resize: none;
-  transition: border-color .2s, box-shadow .2s;
-  line-height: 1.5;
-}
-.form-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-glow);
-}
-.form-input::placeholder { color: var(--text-dim); }
+    .btn {
+      background: linear-gradient(135deg, #0055cc, var(--accent));
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 11px 20px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 15px rgba(0,212,255,0.2);
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,212,255,0.35); }
+    .btn:active { transform: translateY(0); }
+    .btn-sm { font-size: 9px; padding: 8px 14px; }
 
-.generate-btn {
-  margin-top: 10px; width: 100%;
-  background: var(--accent);
-  border: none; border-radius: 8px;
-  padding: 11px; font-family: var(--font-mono);
-  font-size: 12px; font-weight: 600;
-  letter-spacing: .08em; color: #000;
-  cursor: pointer; transition: all .2s;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-}
-.generate-btn:hover { filter: brightness(1.15); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,212,255,0.25); }
-.generate-btn:active { transform: translateY(0); }
-.generate-btn:disabled {
-  background: var(--surface3); color: var(--text-dim);
-  cursor: not-allowed; transform: none; box-shadow: none; filter: none;
-}
-.btn-spinner {
-  width: 13px; height: 13px; border: 2px solid rgba(0,0,0,0.3);
-  border-top-color: #000; border-radius: 50%;
-  animation: spin .7s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
+    .btn-danger {
+      background: rgba(255,60,60,0.12);
+      border: 1px solid rgba(255,60,60,0.3);
+      color: #ff6060;
+      font-size: 10px;
+      padding: 5px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Space Mono', monospace;
+      transition: background 0.2s;
+    }
+    .btn-danger:hover { background: rgba(255,60,60,0.25); }
 
-/* BLUEPRINT OUTPUT */
-.blueprint-output {
-  flex: 1; overflow-y: auto; padding: 16px;
-}
-.blueprint-output::-webkit-scrollbar { width: 3px; }
-.blueprint-output::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 2px; }
+    .goal-edit { display: flex; align-items: center; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .goal-edit label { font-size: 10px; color: var(--muted); white-space: nowrap; letter-spacing: 1px; }
 
-.bp-section {
-  margin-bottom: 20px;
-  animation: slideIn .4s ease both;
-}
-@keyframes slideIn {
-  from { opacity:0; transform:translateY(10px); }
-  to   { opacity:1; transform:translateY(0); }
-}
+    .log-section {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      animation: fadeUp 0.7s ease 0.4s both;
+    }
+    .log-header {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: var(--accent);
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-.bp-section-title {
-  font-size: 9px; font-weight: 700; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--accent);
-  margin-bottom: 10px;
-  display: flex; align-items: center; gap: 6px;
-}
-.bp-section-title::after {
-  content: ''; flex:1; height: 1px;
-  background: linear-gradient(to right, var(--accent-glow), transparent);
-}
+    .log-empty {
+      text-align: center;
+      padding: 24px;
+      color: var(--muted);
+      font-size: 12px;
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+    }
+    .log-empty .icon { font-size: 28px; display: block; margin-bottom: 8px; }
 
-.bp-card {
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 8px; overflow: hidden;
-}
-.bp-row {
-  padding: 8px 12px;
-  display: flex; align-items: flex-start; gap: 8px;
-  border-bottom: 1px solid var(--border);
-  transition: background .15s;
-}
-.bp-row:last-child { border-bottom: none; }
-.bp-row:hover { background: var(--surface3); }
-.bp-row-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
-.bp-row-content { flex:1; min-width:0; }
-.bp-row-label {
-  font-size: 12px; color: var(--text); line-height: 1.4;
-  word-break: break-word;
-}
-.bp-row-sub {
-  font-size: 10px; color: var(--text-muted); margin-top: 2px;
-}
-.bp-row-badge {
-  flex-shrink: 0;
-  font-size: 9px; padding: 2px 6px; border-radius: 3px;
-  font-weight: 600; letter-spacing: .05em;
-}
-.badge-green { background: rgba(0,255,136,0.12); color: var(--accent3); }
-.badge-orange { background: rgba(255,107,53,0.12); color: var(--accent2); }
-.badge-blue { background: rgba(0,212,255,0.12); color: var(--accent); }
+    .log-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(26,58,92,0.5);
+      animation: fadeIn 0.4s ease;
+    }
+    .log-item:last-child { border-bottom: none; }
+    .log-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--green); flex-shrink: 0;
+      box-shadow: 0 0 6px var(--green);
+    }
+    .log-dot.withdrawal { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+    .log-info { flex: 1; overflow: hidden; }
+    .log-note { font-size: 12px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .log-date { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .log-amount { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700; white-space: nowrap; }
+    .log-amount.deposit { color: var(--green); }
+    .log-amount.withdrawal { color: var(--accent2); }
 
-/* STEPS */
-.step-item {
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 8px; margin-bottom: 8px; overflow: hidden;
-}
-.step-head {
-  padding: 10px 12px;
-  display: flex; align-items: center; gap: 8px;
-  cursor: pointer;
-}
-.step-num {
-  width: 22px; height: 22px; border-radius: 5px;
-  background: var(--surface3); border: 1px solid var(--border2);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 10px; font-weight: 700; color: var(--text-muted);
-  flex-shrink: 0;
-}
-.step-title { flex:1; font-size: 12px; font-weight: 500; color: var(--text); }
-.step-check {
-  width: 18px; height: 18px; border-radius: 50%;
-  background: var(--accent3); display: flex;
-  align-items: center; justify-content: center;
-  font-size: 10px; flex-shrink: 0;
-}
-.step-body {
-  padding: 0 12px 10px 42px;
-  font-size: 11px; color: var(--text-muted);
-  line-height: 1.7; border-top: 1px solid var(--border);
-  padding-top: 8px;
-}
+    .complete-banner {
+      display: none;
+      background: linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,212,255,0.1));
+      border: 1px solid var(--green);
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+    .complete-banner.show { display: block; }
+    .complete-banner .big { font-family: 'Orbitron', sans-serif; font-size: 20px; color: var(--green); font-weight: 900; }
+    .complete-banner p { font-size: 12px; color: var(--muted); margin-top: 6px; }
 
-/* EMPTY STATE */
-.empty-state {
-  flex: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 10px; padding: 24px; text-align: center;
-}
-.empty-icon { font-size: 36px; opacity: .3; }
-.empty-text { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
-
-/* ── CENTER: 3D VIEWPORT ─────────────────── */
-.panel-center {
-  display: flex; flex-direction: column;
-  background: var(--bg2); overflow: hidden;
-  position: relative;
-}
-
-.viewport-header {
-  display: flex; align-items: center;
-  padding: 8px 16px; gap: 10px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface); flex-shrink: 0;
-}
-.viewport-title {
-  font-size: 10px; font-weight: 600;
-  letter-spacing: .1em; text-transform: uppercase;
-  color: var(--text-dim);
-}
-.viewport-object-name {
-  font-size: 12px; color: var(--accent);
-  font-weight: 500;
-}
-.viewport-spacer { flex:1; }
-.viewport-controls {
-  display: flex; gap: 4px;
-}
-.vctrl-btn {
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 5px; padding: 4px 8px;
-  color: var(--text-muted); font-size: 10px;
-  font-family: var(--font-mono); cursor: pointer;
-  transition: all .15s;
-}
-.vctrl-btn:hover { border-color: var(--border2); color: var(--text); }
-.vctrl-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
-
-#canvas-wrap {
-  flex: 1; position: relative; overflow: hidden;
-}
-#threejs-canvas {
-  display: block; width: 100%; height: 100%;
-}
-
-.viewport-overlay {
-  position: absolute; bottom: 12px; left: 12px;
-  display: flex; flex-direction: column; gap: 6px;
-}
-.viewport-hint {
-  font-size: 9px; color: var(--text-dim);
-  background: rgba(0,0,0,0.5); padding: 4px 8px;
-  border-radius: 4px; backdrop-filter: blur(4px);
-}
-
-.model-controls-overlay {
-  position: absolute; bottom: 12px; right: 12px;
-  display: flex; flex-direction: column; gap: 4px;
-}
-.model-ctrl {
-  width: 32px; height: 32px;
-  background: rgba(17,20,24,0.85); border: 1px solid var(--border2);
-  border-radius: 6px; color: var(--text-muted); cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px; transition: all .15s;
-  backdrop-filter: blur(8px);
-}
-.model-ctrl:hover { border-color: var(--accent); color: var(--accent); }
-
-/* 3D placeholder when no model */
-.no-model {
-  flex:1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 12px;
-}
-.no-model-grid {
-  position: absolute; inset: 0;
-  background-image:
-    linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
-}
-.no-model-text { position: relative; text-align: center; }
-.no-model-title {
-  font-family: var(--font-display); font-size: 20px;
-  font-weight: 700; color: var(--text-dim); margin-bottom: 4px;
-}
-.no-model-sub { font-size: 11px; color: var(--text-dim); }
-
-/* ── RIGHT PANEL ─────────────────────────── */
-.panel-right {
-  border-left: 1px solid var(--border);
-  display: flex; flex-direction: column;
-  background: var(--surface);
-}
-
-.parts-list {
-  flex:1; overflow-y: auto;
-}
-.parts-list::-webkit-scrollbar { width: 3px; }
-.parts-list::-webkit-scrollbar-thumb { background: var(--surface3); }
-
-.part-item {
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 14px; border-bottom: 1px solid var(--border);
-  cursor: pointer; transition: background .15s;
-}
-.part-item:hover { background: var(--surface2); }
-.part-item.selected { background: var(--surface3); }
-.part-color {
-  width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0;
-}
-.part-info { flex:1; min-width:0; }
-.part-name {
-  font-size: 12px; color: var(--text);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.part-type { font-size: 10px; color: var(--text-muted); }
-.part-status {
-  width: 6px; height: 6px; border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.detail-panel {
-  border-top: 1px solid var(--border);
-  padding: 14px;
-  min-height: 160px;
-}
-.detail-title {
-  font-size: 11px; font-weight: 600; color: var(--text);
-  margin-bottom: 10px;
-}
-.detail-row {
-  display: flex; justify-content: space-between;
-  align-items: flex-start;
-  padding: 5px 0;
-  border-bottom: 1px solid var(--border);
-  gap: 8px;
-}
-.detail-row:last-child { border-bottom: none; }
-.detail-key {
-  font-size: 10px; color: var(--text-dim);
-  text-transform: uppercase; letter-spacing: .06em;
-  flex-shrink: 0;
-}
-.detail-val { font-size: 11px; color: var(--text); text-align: right; }
-
-/* ── LOADING OVERLAY ─────────────────────── */
-.loading-overlay {
-  position: fixed; inset: 0;
-  background: rgba(8,10,12,0.85);
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 16px;
-  z-index: 200;
-  backdrop-filter: blur(8px);
-  display: none;
-}
-.loading-overlay.active { display: flex; }
-.loading-spinner {
-  width: 48px; height: 48px;
-  border: 2px solid var(--border2);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin .8s linear infinite;
-}
-.loading-text {
-  font-size: 13px; color: var(--text-muted);
-  font-family: var(--font-mono);
-  max-width: 280px; text-align: center; line-height: 1.6;
-}
-.loading-step {
-  font-size: 11px; color: var(--accent);
-  font-family: var(--font-mono);
-}
-
-/* ── TOAST ───────────────────────────────── */
-.toast {
-  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-  background: var(--surface3); border: 1px solid var(--border2);
-  border-radius: 8px; padding: 10px 18px;
-  font-size: 12px; color: var(--text);
-  z-index: 300; opacity: 0;
-  transition: opacity .3s;
-  pointer-events: none; white-space: nowrap;
-}
-.toast.show { opacity: 1; }
-
-/* ── RESPONSIVE / SAFARI FIXES ───────────── */
-@supports (-webkit-touch-callout: none) {
-  body { height: -webkit-fill-available; }
-  .app { height: -webkit-fill-available; }
-}
-</style>
-
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+    @keyframes fadeDown { from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)} }
+    @keyframes fadeIn { from{opacity:0}to{opacity:1} }
+    @keyframes glow { from{box-shadow:0 0 10px rgba(0,255,136,0.2)}to{box-shadow:0 0 25px rgba(0,255,136,0.5)} }
+  </style>
 </head>
 <body>
+<div class="stars"></div>
+<div class="container">
 
-<div class="app">
-
-  <!-- TOP BAR -->
-
-  <header class="topbar">
-    <div class="logo">Blueprint<span>.ai</span></div>
-    <div class="topbar-status">
-      <div class="status-dot"></div>
-      Ready
-    </div>
-    <div class="topbar-spacer"></div>
-    <div class="view-tabs">
-      <button class="view-tab active" onclick="setView('blueprint')">Blueprint</button>
-      <button class="view-tab" onclick="setView('3d')">3D Model</button>
-      <button class="view-tab" onclick="setView('both')">Both</button>
-    </div>
-  </header>
-
-  <!-- WORKSPACE -->
-
-  <div class="workspace" id="workspace">
-
-```
-<!-- LEFT: INPUT + BLUEPRINT -->
-<div class="panel-left" id="panel-left">
-  <div class="panel-header">
-    <div class="panel-header-dot"></div>
-    Project Input
+  <div class="header">
+    <div class="badge">🚀 Mission: Bambu Lab A1</div>
+    <h1>SAVINGS<br><span>TRACKER</span></h1>
+    <p>INDIA EDITION · ₹ INR</p>
   </div>
 
-  <div class="project-form">
-    <div class="form-label">Describe your hardware project</div>
-    <textarea class="form-input" id="project-input" rows="4"
-      placeholder="e.g. A sugar fuel model rocket with electronic ignition, 3D printed fins, and an Arduino flight controller..."></textarea>
-    <button class="generate-btn" id="gen-btn" onclick="generateBlueprint()">
-      <span id="gen-btn-text">⚡ Generate Blueprint</span>
-    </button>
+  <div class="complete-banner" id="completeBanner">
+    <div class="big">🎉 MISSION COMPLETE! 🎉</div>
+    <p>You've saved enough to buy the Bambu Lab A1! Time to launch your rockets! 🚀</p>
   </div>
 
-  <div id="blueprint-output" class="blueprint-output">
-    <div class="empty-state">
-      <div class="empty-icon">📐</div>
-      <div class="empty-text">Describe your project above and hit Generate.<br>Your full blueprint will appear here.</div>
+  <div class="launch-pad">
+    <div class="progress-label">
+      <div class="pct" id="pctText">0%</div>
+      <div class="goal-text">GOAL<br><strong id="goalDisplay">₹30,899</strong></div>
+    </div>
+    <div class="track-wrap">
+      <div class="rocket-emoji" id="rocketEmoji">🚀</div>
+      <div class="track"><div class="fill" id="fillBar" style="width:0%"></div></div>
+    </div>
+    <div class="amounts">
+      <span class="saved-amt">✅ Saved: <span id="savedAmt">₹0</span></span>
+      <span class="remaining-amt">🎯 Left: <span id="remainAmt">₹30,899</span></span>
+    </div>
+    <div class="milestone-bar">
+      <div class="milestone" id="m25"><div class="dot">🌱</div>25%</div>
+      <div class="milestone" id="m50"><div class="dot">⚡</div>50%</div>
+      <div class="milestone" id="m75"><div class="dot">🔥</div>75%</div>
+      <div class="milestone" id="m100"><div class="dot">🚀</div>100%</div>
     </div>
   </div>
-</div>
 
-<!-- CENTER: 3D VIEWPORT -->
-<div class="panel-center" id="panel-center">
-  <div class="viewport-header">
-    <span class="viewport-title">3D Viewport</span>
-    <span class="viewport-object-name" id="viewport-obj-name">— no model —</span>
-    <div class="viewport-spacer"></div>
-    <div class="viewport-controls">
-      <button class="vctrl-btn active" id="btn-solid" onclick="setRenderMode('solid')">Solid</button>
-      <button class="vctrl-btn" id="btn-wire" onclick="setRenderMode('wire')">Wire</button>
-      <button class="vctrl-btn" id="btn-x-ray" onclick="setRenderMode('xray')">X-Ray</button>
+  <div class="stats">
+    <div class="stat-card">
+      <div class="label">Total Saved</div>
+      <div class="value green" id="statSaved">₹0</div>
+      <div class="sub" id="statDeposits">0 deposits</div>
     </div>
-    <button class="vctrl-btn" onclick="resetCamera()" style="margin-left:8px">Reset</button>
-    <button class="vctrl-btn" onclick="exportModel()">Export STL</button>
+    <div class="stat-card">
+      <div class="label">Still Needed</div>
+      <div class="value orange" id="statRemain">₹30,899</div>
+      <div class="sub" id="statEst">keep saving!</div>
+    </div>
   </div>
 
-  <div id="canvas-wrap">
-    <canvas id="threejs-canvas"></canvas>
-    <div class="viewport-overlay">
-      <div class="viewport-hint">🖱 Drag to orbit · Scroll to zoom · Right-drag to pan</div>
-    </div>
-    <div class="model-controls-overlay">
-      <button class="model-ctrl" onclick="zoomModel(1.2)" title="Zoom In">+</button>
-      <button class="model-ctrl" onclick="zoomModel(0.8)" title="Zoom Out">−</button>
-      <button class="model-ctrl" onclick="toggleRotate()" title="Auto-rotate" id="rotate-btn">↻</button>
-    </div>
-    <!-- no-model placeholder rendered by three.js bg -->
-    <div class="no-model" id="no-model-placeholder">
-      <div class="no-model-grid"></div>
-      <div class="no-model-text">
-        <div class="no-model-title">No Model Yet</div>
-        <div class="no-model-sub">Generate a blueprint to build<br>a 3D preview of your project</div>
+  <div class="input-section">
+    <h3>⚡ Add Entry</h3>
+    <div class="input-row">
+      <div class="inp-wrap">
+        <span class="rupee">₹</span>
+        <input type="number" id="amtInput" placeholder="Amount" min="1" />
       </div>
+      <input type="date" id="dateInput" style="flex:1;min-width:140px" />
+    </div>
+    <div class="input-row">
+      <input type="text" id="noteInput" placeholder="Note (e.g. Pocket money, side gig...)" style="flex:1" />
+      <select id="typeInput" style="flex:0 0 140px">
+        <option value="deposit">➕ Deposit</option>
+        <option value="withdrawal">➖ Withdraw</option>
+      </select>
+    </div>
+    <button class="btn" onclick="addEntry()" style="width:100%">ADD TO MISSION LOG</button>
+    <div class="goal-edit">
+      <label>CHANGE GOAL:</label>
+      <div class="inp-wrap" style="max-width:150px">
+        <span class="rupee">₹</span>
+        <input type="number" id="goalInput" value="30899" min="1" />
+      </div>
+      <button class="btn btn-sm" onclick="updateGoal()">UPDATE</button>
     </div>
   </div>
-</div>
 
-<!-- RIGHT: PARTS + DETAIL -->
-<div class="panel-right" id="panel-right">
-  <div class="panel-header">
-    <div class="panel-header-dot" style="background:var(--accent2)"></div>
-    Parts List
-  </div>
-  <div class="parts-list" id="parts-list">
-    <div class="empty-state" style="padding:40px 16px;">
-      <div class="empty-icon">🔩</div>
-      <div class="empty-text">Parts will appear here after generating</div>
+  <div class="log-section">
+    <div class="log-header">
+      MISSION LOG
+      <button class="btn-danger" onclick="clearAll()">CLEAR ALL</button>
+    </div>
+    <div id="logList">
+      <div class="log-empty"><span class="icon">📋</span>No entries yet. Add your first deposit!</div>
     </div>
   </div>
-  <div class="detail-panel" id="detail-panel">
-    <div class="detail-title" style="color:var(--text-dim)">Select a part for details</div>
-  </div>
+
 </div>
-```
-
-  </div>
-</div>
-
-<!-- LOADING OVERLAY -->
-
-<div class="loading-overlay" id="loading-overlay">
-  <div class="loading-spinner"></div>
-  <div class="loading-text">AI is designing your hardware blueprint…</div>
-  <div class="loading-step" id="loading-step">Analyzing requirements</div>
-</div>
-
-<!-- TOAST -->
-
-<div class="toast" id="toast"></div>
 
 <script>
-// ── STATE ────────────────────────────────────────────────
-let currentView = 'both';
-let currentBlueprint = null;
-let selectedPart = null;
-let autoRotate = false;
-let renderMode = 'solid';
-let threeScene, threeCamera, threeRenderer, modelGroup;
-let orbitTarget = { x: 0, y: 0, z: 0 };
-let isDragging = false, isRightDrag = false;
-let lastMouse = { x: 0, y: 0 };
-let spherical = { theta: 0.5, phi: 1.0, radius: 8 };
-let wireOverlay = null;
+  const KEY = 'a1_tracker_v3';
+  let state = (() => { try { const r = localStorage.getItem(KEY); return r ? JSON.parse(r) : null; } catch(e){} return null; })() || { goal: 30899, entries: [] };
 
-// ── COLORS ───────────────────────────────────────────────
-const PART_COLORS = [
-  '#00d4ff','#ff6b35','#00ff88','#a855f7','#ffcc00',
-  '#ff4488','#44aaff','#ff8844','#88ff44','#cc44ff'
-];
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
 
-// ── VIEW LAYOUT ──────────────────────────────────────────
-function setView(v) {
-  currentView = v;
-  document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
-  event.target.classList.add('active');
-  const ws = document.getElementById('workspace');
-  const pl = document.getElementById('panel-left');
-  const pc = document.getElementById('panel-center');
-  const pr = document.getElementById('panel-right');
+  function fmt(n) { return '₹' + Math.abs(Math.round(n)).toLocaleString('en-IN'); }
 
-  if (v === 'blueprint') {
-    ws.style.gridTemplateColumns = '1fr 0 0';
-    pc.style.display = 'none'; pr.style.display = 'none';
-  } else if (v === '3d') {
-    ws.style.gridTemplateColumns = '0 1fr 280px';
-    pl.style.display = 'none'; pc.style.display = 'flex'; pr.style.display = 'flex';
-  } else {
-    ws.style.gridTemplateColumns = '340px 1fr 280px';
-    pl.style.display = 'flex'; pc.style.display = 'flex'; pr.style.display = 'flex';
+  function getTotal() {
+    return state.entries.reduce((s, e) => s + (e.type === 'deposit' ? e.amount : -e.amount), 0);
   }
-  setTimeout(() => { if (threeRenderer) onResize(); }, 50);
-}
 
-// ── THREE.JS SETUP ───────────────────────────────────────
-function initThree() {
-  const canvas = document.getElementById('threejs-canvas');
-  const wrap = document.getElementById('canvas-wrap');
+  function render() {
+    const saved = Math.max(0, getTotal());
+    const goal = state.goal;
+    const pct = Math.min(100, (saved / goal) * 100);
+    const remain = Math.max(0, goal - saved);
 
-  threeScene = new THREE.Scene();
-  threeScene.background = new THREE.Color(0x080a0c);
-  threeScene.fog = new THREE.FogExp2(0x080a0c, 0.04);
+    document.getElementById('fillBar').style.width = pct + '%';
 
-  threeCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 200);
-  updateCameraPos();
+    const rPct = 5 + (pct / 100) * 88;
+    document.getElementById('rocketEmoji').style.left = `calc(${rPct}% - 14px)`;
 
-  threeRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-  threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  threeRenderer.shadowMap.enabled = true;
-  threeRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  onResize();
+    document.getElementById('pctText').textContent = Math.floor(pct) + '%';
+    document.getElementById('goalDisplay').textContent = fmt(goal);
+    document.getElementById('savedAmt').textContent = fmt(saved);
+    document.getElementById('remainAmt').textContent = fmt(remain);
+    document.getElementById('statSaved').textContent = fmt(saved);
+    document.getElementById('statRemain').textContent = fmt(remain);
+    document.getElementById('goalInput').value = goal;
 
-  // Lighting
-  const ambient = new THREE.AmbientLight(0x223344, 0.8);
-  threeScene.add(ambient);
+    const deps = state.entries.filter(e => e.type === 'deposit').length;
+    document.getElementById('statDeposits').textContent = deps + ' deposit' + (deps !== 1 ? 's' : '');
 
-  const dirLight = new THREE.DirectionalLight(0x00d4ff, 1.2);
-  dirLight.position.set(5, 8, 5);
-  dirLight.castShadow = true;
-  threeScene.add(dirLight);
-
-  const fillLight = new THREE.DirectionalLight(0xff6b35, 0.4);
-  fillLight.position.set(-5, -2, -5);
-  threeScene.add(fillLight);
-
-  const rimLight = new THREE.PointLight(0x00ff88, 0.6, 20);
-  rimLight.position.set(0, 6, -6);
-  threeScene.add(rimLight);
-
-  // Grid
-  const gridHelper = new THREE.GridHelper(20, 20, 0x1a2030, 0x0d1520);
-  gridHelper.position.y = -0.01;
-  threeScene.add(gridHelper);
-
-  // Model group
-  modelGroup = new THREE.Group();
-  threeScene.add(modelGroup);
-
-  // Events
-  canvas.addEventListener('mousedown', onMouseDown);
-  canvas.addEventListener('mousemove', onMouseMove);
-  canvas.addEventListener('mouseup', () => isDragging = false);
-  canvas.addEventListener('wheel', onWheel, { passive: false });
-  canvas.addEventListener('contextmenu', e => e.preventDefault());
-
-  // Touch
-  canvas.addEventListener('touchstart', onTouchStart, { passive: false });
-  canvas.addEventListener('touchmove', onTouchMove, { passive: false });
-  canvas.addEventListener('touchend', () => isDragging = false);
-
-  window.addEventListener('resize', onResize);
-
-  animate();
-}
-
-function onResize() {
-  const wrap = document.getElementById('canvas-wrap');
-  const w = wrap.clientWidth, h = wrap.clientHeight;
-  if (!w || !h) return;
-  threeRenderer.setSize(w, h);
-  threeCamera.aspect = w / h;
-  threeCamera.updateProjectionMatrix();
-}
-
-function animate() {
-  requestAnimationFrame(animate);
-  if (autoRotate && modelGroup.children.length > 0) {
-    modelGroup.rotation.y += 0.005;
-  }
-  threeRenderer.render(threeScene, threeCamera);
-}
-
-function updateCameraPos() {
-  const { theta, phi, radius } = spherical;
-  threeCamera.position.set(
-    radius * Math.sin(phi) * Math.sin(theta),
-    radius * Math.cos(phi),
-    radius * Math.sin(phi) * Math.cos(theta)
-  );
-  threeCamera.lookAt(orbitTarget.x, orbitTarget.y, orbitTarget.z);
-}
-
-// Mouse / Touch orbit
-function onMouseDown(e) {
-  isDragging = true;
-  isRightDrag = e.button === 2;
-  lastMouse = { x: e.clientX, y: e.clientY };
-}
-function onMouseMove(e) {
-  if (!isDragging) return;
-  const dx = e.clientX - lastMouse.x;
-  const dy = e.clientY - lastMouse.y;
-  lastMouse = { x: e.clientX, y: e.clientY };
-  if (isRightDrag) {
-    orbitTarget.x -= dx * 0.01;
-    orbitTarget.y += dy * 0.01;
-  } else {
-    spherical.theta -= dx * 0.01;
-    spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi + dy * 0.01));
-  }
-  updateCameraPos();
-}
-function onWheel(e) {
-  e.preventDefault();
-  spherical.radius = Math.max(2, Math.min(30, spherical.radius + e.deltaY * 0.02));
-  updateCameraPos();
-}
-let lastPinchDist = 0;
-function onTouchStart(e) {
-  e.preventDefault();
-  if (e.touches.length === 1) {
-    isDragging = true; isRightDrag = false;
-    lastMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  } else if (e.touches.length === 2) {
-    lastPinchDist = Math.hypot(
-      e.touches[0].clientX - e.touches[1].clientX,
-      e.touches[0].clientY - e.touches[1].clientY
-    );
-  }
-}
-function onTouchMove(e) {
-  e.preventDefault();
-  if (e.touches.length === 1 && isDragging) {
-    const dx = e.touches[0].clientX - lastMouse.x;
-    const dy = e.touches[0].clientY - lastMouse.y;
-    lastMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    spherical.theta -= dx * 0.01;
-    spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi + dy * 0.01));
-    updateCameraPos();
-  } else if (e.touches.length === 2) {
-    const dist = Math.hypot(
-      e.touches[0].clientX - e.touches[1].clientX,
-      e.touches[0].clientY - e.touches[1].clientY
-    );
-    spherical.radius = Math.max(2, Math.min(30, spherical.radius - (dist - lastPinchDist) * 0.04));
-    lastPinchDist = dist;
-    updateCameraPos();
-  }
-}
-
-function zoomModel(f) {
-  spherical.radius = Math.max(2, Math.min(30, spherical.radius * f));
-  updateCameraPos();
-}
-function resetCamera() {
-  spherical = { theta: 0.5, phi: 1.0, radius: 8 };
-  orbitTarget = { x: 0, y: 0, z: 0 };
-  if (modelGroup) modelGroup.rotation.y = 0;
-  updateCameraPos();
-}
-function toggleRotate() {
-  autoRotate = !autoRotate;
-  document.getElementById('rotate-btn').style.color = autoRotate ? 'var(--accent)' : '';
-}
-
-function setRenderMode(mode) {
-  renderMode = mode;
-  document.querySelectorAll('.vctrl-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('btn-' + mode)?.classList.add('active');
-  if (!modelGroup) return;
-  modelGroup.traverse(obj => {
-    if (!obj.isMesh) return;
-    if (mode === 'wire') {
-      obj.material.wireframe = true;
-      obj.material.opacity = 1;
-      obj.material.transparent = false;
-    } else if (mode === 'xray') {
-      obj.material.wireframe = false;
-      obj.material.opacity = 0.35;
-      obj.material.transparent = true;
+    if (remain > 0 && deps > 0) {
+      const avg = saved / deps;
+      document.getElementById('statEst').textContent = avg > 0 ? `~${Math.ceil(remain / avg)} more deposits` : 'keep saving!';
     } else {
-      obj.material.wireframe = false;
-      obj.material.opacity = 1;
-      obj.material.transparent = false;
+      document.getElementById('statEst').textContent = pct >= 100 ? '🎉 Goal reached!' : 'keep saving!';
     }
-  });
-}
 
-// ── BUILD 3D MODEL FROM BLUEPRINT ──────────
-function build3DModel(blueprint) {
-  document.getElementById('no-model-placeholder').style.display = 'none';
-
-  // Clear old
-  while (modelGroup.children.length) modelGroup.remove(modelGroup.children[0]);
-  modelGroup.rotation.y = 0;
-  resetCamera();
-
-  const parts = blueprint.parts || [];
-  const shapes = generateShapesForProject(blueprint.type, parts);
-
-  shapes.forEach((s, i) => {
-    const color = PART_COLORS[i % PART_COLORS.length];
-    const mat = new THREE.MeshStandardMaterial({
-      color: new THREE.Color(color),
-      roughness: 0.4, metalness: 0.3,
-      envMapIntensity: 0.5,
+    ['25','50','75','100'].forEach(m => {
+      document.getElementById('m'+m).classList.toggle('reached', pct >= parseInt(m));
     });
-    const mesh = new THREE.Mesh(s.geo, mat);
-    mesh.position.set(...s.pos);
-    mesh.rotation.set(...(s.rot || [0,0,0]));
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    mesh.userData = { partName: s.name };
-    modelGroup.add(mesh);
-  });
 
-  document.getElementById('viewport-obj-name').textContent = blueprint.title || 'Project';
-  spherical.radius = Math.max(6, parts.length * 0.8 + 5);
-  updateCameraPos();
-  showToast('3D model built ✓');
-}
+    document.getElementById('completeBanner').classList.toggle('show', pct >= 100);
 
-function generateShapesForProject(type, parts) {
-  const t = (type || '').toLowerCase();
-  const shapes = [];
-
-  if (t.includes('rocket')) {
-    // Nose cone
-    shapes.push({ name:'Nose Cone', geo: new THREE.ConeGeometry(0.4,1.2,16), pos:[0,2.6,0] });
-    // Body tube
-    shapes.push({ name:'Body Tube', geo: new THREE.CylinderGeometry(0.4,0.4,3,24), pos:[0,0.6,0] });
-    // Engine mount
-    shapes.push({ name:'Engine Mount', geo: new THREE.CylinderGeometry(0.22,0.22,0.6,16), pos:[0,-0.7,0] });
-    // Nozzle
-    shapes.push({ name:'Nozzle', geo: new THREE.CylinderGeometry(0.28,0.14,0.4,12), pos:[0,-1.2,0] });
-    // Fins x3
-    for (let i=0;i<3;i++) {
-      const a = (i/3)*Math.PI*2;
-      const fg = new THREE.BoxGeometry(0.06,0.8,0.5);
-      shapes.push({ name:`Fin ${i+1}`, geo:fg, pos:[Math.sin(a)*0.42, -0.4, Math.cos(a)*0.42], rot:[0,a,0] });
+    const logEl = document.getElementById('logList');
+    if (!state.entries.length) {
+      logEl.innerHTML = '<div class="log-empty"><span class="icon">📋</span>No entries yet. Add your first deposit!</div>';
+    } else {
+      logEl.innerHTML = [...state.entries].reverse().map((e, ri) => {
+        const idx = state.entries.length - 1 - ri;
+        return `<div class="log-item">
+          <div class="log-dot ${e.type === 'withdrawal' ? 'withdrawal' : ''}"></div>
+          <div class="log-info">
+            <div class="log-note">${e.note || (e.type === 'deposit' ? 'Deposit' : 'Withdrawal')}</div>
+            <div class="log-date">${e.date || '—'}</div>
+          </div>
+          <div class="log-amount ${e.type}">${e.type === 'deposit' ? '+' : '-'}${fmt(e.amount)}</div>
+          <button class="btn-danger" onclick="del(${idx})">✕</button>
+        </div>`;
+      }).join('');
     }
-    // Avionics bay
-    shapes.push({ name:'Avionics Bay', geo: new THREE.CylinderGeometry(0.38,0.38,0.5,16), pos:[0,2.05,0] });
-    // Launch lug
-    shapes.push({ name:'Launch Lug', geo: new THREE.CylinderGeometry(0.06,0.06,0.5,8), pos:[0.44,0.2,0], rot:[0,0,Math.PI/2] });
+  }
 
-  } else if (t.includes('drone') || t.includes('quad')) {
-    // Frame center
-    shapes.push({ name:'Frame Center', geo: new THREE.BoxGeometry(0.8,0.15,0.8), pos:[0,0,0] });
-    // Arms x4
-    [45,135,225,315].forEach((a,i) => {
-      const rad = a*Math.PI/180;
-      shapes.push({ name:`Arm ${i+1}`, geo: new THREE.BoxGeometry(1.4,0.08,0.12), pos:[Math.cos(rad)*0.7,0,Math.sin(rad)*0.7], rot:[0,rad,0] });
+  function addEntry() {
+    const amt = parseFloat(document.getElementById('amtInput').value);
+    if (!amt || amt <= 0) {
+      const inp = document.getElementById('amtInput');
+      inp.style.borderColor = '#ff4444';
+      inp.focus();
+      setTimeout(() => inp.style.borderColor = '', 1200);
+      return;
+    }
+    state.entries.push({
+      amount: amt,
+      note: document.getElementById('noteInput').value.trim(),
+      date: document.getElementById('dateInput').value,
+      type: document.getElementById('typeInput').value
     });
-    // Motors
-    [1,-1].forEach(sx => [1,-1].forEach(sz => {
-      shapes.push({ name:'Motor', geo: new THREE.CylinderGeometry(0.12,0.12,0.18,12), pos:[sx*0.95,0.12,sz*0.95] });
-      // Props
-      shapes.push({ name:'Propeller', geo: new THREE.CylinderGeometry(0.38,0.38,0.025,16), pos:[sx*0.95,0.22,sz*0.95] });
-    }));
-    // FC board
-    shapes.push({ name:'Flight Controller', geo: new THREE.BoxGeometry(0.4,0.05,0.4), pos:[0,0.11,0] });
-    // Battery
-    shapes.push({ name:'Battery', geo: new THREE.BoxGeometry(0.6,0.15,0.28), pos:[0,-0.12,0] });
-
-  } else if (t.includes('robot') || t.includes('arm')) {
-    // Base
-    shapes.push({ name:'Base', geo: new THREE.CylinderGeometry(0.8,0.9,0.3,20), pos:[0,-1.5,0] });
-    // Shoulder
-    shapes.push({ name:'Shoulder Joint', geo: new THREE.SphereGeometry(0.3,12,12), pos:[0,-1.0,0] });
-    // Upper arm
-    shapes.push({ name:'Upper Arm', geo: new THREE.BoxGeometry(0.2,1.2,0.2), pos:[0,-0.2,0] });
-    // Elbow
-    shapes.push({ name:'Elbow Joint', geo: new THREE.SphereGeometry(0.22,12,12), pos:[0,0.5,0] });
-    // Forearm
-    shapes.push({ name:'Forearm', geo: new THREE.BoxGeometry(0.16,1.0,0.16), pos:[0.4,1.0,0], rot:[0,0,0.5] });
-    // Wrist
-    shapes.push({ name:'Wrist Joint', geo: new THREE.SphereGeometry(0.16,12,12), pos:[0.9,1.3,0] });
-    // Gripper L
-    shapes.push({ name:'Gripper L', geo: new THREE.BoxGeometry(0.08,0.35,0.06), pos:[1.1,1.45,-0.1] });
-    shapes.push({ name:'Gripper R', geo: new THREE.BoxGeometry(0.08,0.35,0.06), pos:[1.1,1.45,0.1] });
-
-  } else if (t.includes('car') || t.includes('vehicle')) {
-    // Chassis
-    shapes.push({ name:'Chassis', geo: new THREE.BoxGeometry(2.4,0.15,1.2), pos:[0,0.15,0] });
-    // Body
-    shapes.push({ name:'Body', geo: new THREE.BoxGeometry(2.0,0.35,1.0), pos:[0,0.39,0] });
-    // Cab
-    shapes.push({ name:'Cab', geo: new THREE.BoxGeometry(1.0,0.45,0.9), pos:[-0.2,0.7,0] });
-    // Wheels x4
-    [[0.9,0,0.55],[0.9,0,-0.55],[-0.9,0,0.55],[-0.9,0,-0.55]].forEach(([x,y,z],i) => {
-      shapes.push({ name:`Wheel ${i+1}`, geo: new THREE.CylinderGeometry(0.28,0.28,0.18,16), pos:[x,y,z], rot:[Math.PI/2,0,0] });
-    });
-    // Motor
-    shapes.push({ name:'Drive Motor', geo: new THREE.BoxGeometry(0.4,0.25,0.6), pos:[0,0.26,0] });
-    // Battery pack
-    shapes.push({ name:'Battery Pack', geo: new THREE.BoxGeometry(0.8,0.18,0.7), pos:[0.5,0.26,0] });
-
-  } else {
-    // Generic electronic device
-    // PCB
-    shapes.push({ name:'Main PCB', geo: new THREE.BoxGeometry(2,0.05,1.4), pos:[0,0,0] });
-    // MCU chip
-    shapes.push({ name:'Microcontroller', geo: new THREE.BoxGeometry(0.4,0.08,0.4), pos:[-0.3,0.06,0] });
-    // Capacitors
-    [[-0.8,0,-0.3],[0.6,0,0.4],[0.2,0,-0.5]].forEach(([x,y,z],i) => {
-      shapes.push({ name:`Capacitor ${i+1}`, geo: new THREE.CylinderGeometry(0.06,0.06,0.18,8), pos:[x,0.12,z] });
-    });
-    // Connector
-    shapes.push({ name:'USB Connector', geo: new THREE.BoxGeometry(0.22,0.1,0.4), pos:[1.05,0.07,0] });
-    // LED array
-    shapes.push({ name:'LED Array', geo: new THREE.BoxGeometry(0.6,0.04,0.12), pos:[0.2,0.06,0.55] });
-    // Heatsink
-    shapes.push({ name:'Heatsink', geo: new THREE.BoxGeometry(0.5,0.25,0.5), pos:[0.5,0.15,-0.3] });
-    // Antenna
-    shapes.push({ name:'Antenna', geo: new THREE.CylinderGeometry(0.02,0.02,0.6,6), pos:[-0.9,0.32,0.5] });
+    save();
+    document.getElementById('amtInput').value = '';
+    document.getElementById('noteInput').value = '';
+    render();
   }
 
-  return shapes;
-}
+  function del(i) { state.entries.splice(i, 1); save(); render(); }
 
-// ── AI BLUEPRINT GENERATION ──────────────────
-async function generateBlueprint() {
-  const input = document.getElementById('project-input').value.trim();
-  if (!input) { showToast('Please describe your project first'); return; }
-
-  const btn = document.getElementById('gen-btn');
-  const btnText = document.getElementById('gen-btn-text');
-  btn.disabled = true;
-  btnText.innerHTML = '<div class="btn-spinner"></div> Generating…';
-
-  showLoading(true);
-  animateLoadingSteps(['Analyzing requirements…', 'Designing architecture…', 'Selecting components…', 'Writing instructions…', 'Building 3D model…']);
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{
-          role: 'user',
-          content: `You are a hardware engineering AI. Given a project description, output a complete JSON blueprint.
-
-Project: "${input}"
-
-Respond ONLY with valid JSON, no markdown, no preamble:
-{
-  "title": "short project name",
-  "type": "rocket|drone|robot|car|electronics|other",
-  "description": "2-sentence overview",
-  "tools": ["tool1","tool2",...],
-  "assumptions": ["assumption1","assumption2",...],
-  "parts": [
-    {"name":"Part Name","quantity":1,"material":"material","color":"#hex","type":"mechanical|electronic|structural|fastener","notes":"brief note"}
-  ],
-  "steps": [
-    {"number":1,"title":"Step Title","description":"detailed instruction","duration":"estimate","tools":["tool"],"warnings":["any warnings"]}
-  ],
-  "safety": ["safety note 1","safety note 2"],
-  "estimated_cost": "$XX-XX USD",
-  "difficulty": "Beginner|Intermediate|Advanced",
-  "build_time": "X hours"
-}`
-        }]
-      })
-    });
-
-    if (!res.ok) throw new Error(`API ${res.status}`);
-    const data = await res.json();
-    const raw = data.content.find(c => c.type === 'text')?.text || '{}';
-    const clean = raw.replace(/```json|```/g,'').trim();
-    const bp = JSON.parse(clean);
-    currentBlueprint = bp;
-
-    showLoading(false);
-    renderBlueprint(bp);
-    renderParts(bp.parts || []);
-    build3DModel(bp);
-    showToast('Blueprint generated ✓');
-
-    // Auto-switch to both view
-    if (currentView === 'blueprint') setView('both');
-
-  } catch (err) {
-    showLoading(false);
-    showToast('Error: ' + err.message);
-    console.error(err);
+  function updateGoal() {
+    const g = parseFloat(document.getElementById('goalInput').value);
+    if (g > 0) { state.goal = g; save(); render(); }
   }
 
-  btn.disabled = false;
-  btnText.innerHTML = '⚡ Generate Blueprint';
-}
-
-// ── RENDER BLUEPRINT ──────────────────────────
-function renderBlueprint(bp) {
-  const out = document.getElementById('blueprint-output');
-  let html = '';
-
-  // Header
-  html += `<div class="bp-section" style="animation-delay:0s">
-    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:4px;">
-      <div style="font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">${esc(bp.title)}</div>
-      <div style="font-size:11px;color:var(--text-muted);line-height:1.6">${esc(bp.description)}</div>
-      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-        <span class="bp-row-badge badge-blue">⚙ ${esc(bp.difficulty)}</span>
-        <span class="bp-row-badge badge-green">⏱ ${esc(bp.build_time)}</span>
-        <span class="bp-row-badge badge-orange">💰 ${esc(bp.estimated_cost)}</span>
-      </div>
-    </div>
-  </div>`;
-
-  // Tools
-  if (bp.tools?.length) {
-    html += `<div class="bp-section" style="animation-delay:.05s">
-      <div class="bp-section-title">🔧 Tools Required</div>
-      <div class="bp-card">
-        ${bp.tools.map(t => `<div class="bp-row"><div class="bp-row-icon">›</div><div class="bp-row-label">${esc(t)}</div></div>`).join('')}
-      </div>
-    </div>`;
+  function clearAll() {
+    if (confirm('Clear all saved entries? This cannot be undone!')) {
+      state.entries = []; save(); render();
+    }
   }
 
-  // Safety
-  if (bp.safety?.length) {
-    html += `<div class="bp-section" style="animation-delay:.1s">
-      <div class="bp-section-title">⚠ Safety Notes</div>
-      <div class="bp-card">
-        ${bp.safety.map(s => `<div class="bp-row"><div class="bp-row-icon" style="color:var(--warn)">!</div><div class="bp-row-label">${esc(s)}</div></div>`).join('')}
-      </div>
-    </div>`;
-  }
-
-  // Steps
-  if (bp.steps?.length) {
-    html += `<div class="bp-section" style="animation-delay:.15s">
-      <div class="bp-section-title">📋 Build Steps</div>
-      ${bp.steps.map(s => `
-        <div class="step-item">
-          <div class="step-head" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
-            <div class="step-num">${s.number}</div>
-            <div class="step-title">${esc(s.title)}</div>
-            <span class="bp-row-badge badge-blue" style="margin-right:4px">${esc(s.duration||'')}</span>
-          </div>
-          <div class="step-body" style="display:none">
-            ${esc(s.description)}
-            ${s.warnings?.length ? `<div style="margin-top:6px;color:var(--warn)">⚠ ${s.warnings.join(' | ')}</div>` : ''}
-          </div>
-        </div>`).join('')}
-    </div>`;
-  }
-
-  // Assumptions
-  if (bp.assumptions?.length) {
-    html += `<div class="bp-section" style="animation-delay:.2s">
-      <div class="bp-section-title">📌 Assumptions</div>
-      <div class="bp-card">
-        ${bp.assumptions.map(a => `<div class="bp-row"><div class="bp-row-icon">–</div><div class="bp-row-label">${esc(a)}</div></div>`).join('')}
-      </div>
-    </div>`;
-  }
-
-  out.innerHTML = html;
-}
-
-// ── RENDER PARTS ──────────────────────────────
-function renderParts(parts) {
-  const list = document.getElementById('parts-list');
-  if (!parts.length) return;
-
-  list.innerHTML = parts.map((p, i) => `
-    <div class="part-item" onclick="selectPart(${i})" id="part-${i}">
-      <div class="part-color" style="background:${p.color || PART_COLORS[i%PART_COLORS.length]}"></div>
-      <div class="part-info">
-        <div class="part-name">${esc(p.name)}</div>
-        <div class="part-type">${esc(p.type||'')} · qty ${p.quantity||1}</div>
-      </div>
-      <div class="part-status" style="background:var(--accent3)"></div>
-    </div>`).join('');
-}
-
-function selectPart(i) {
-  document.querySelectorAll('.part-item').forEach(el => el.classList.remove('selected'));
-  document.getElementById('part-' + i)?.classList.add('selected');
-  const p = currentBlueprint?.parts?.[i];
-  if (!p) return;
-  const detail = document.getElementById('detail-panel');
-  detail.innerHTML = `
-    <div class="detail-title">${esc(p.name)}</div>
-    <div class="detail-row"><span class="detail-key">Material</span><span class="detail-val">${esc(p.material||'—')}</span></div>
-    <div class="detail-row"><span class="detail-key">Quantity</span><span class="detail-val">${p.quantity||1}</span></div>
-    <div class="detail-row"><span class="detail-key">Type</span><span class="detail-val">${esc(p.type||'—')}</span></div>
-    <div class="detail-row"><span class="detail-key">Notes</span><span class="detail-val" style="font-size:10px;max-width:140px;text-align:right">${esc(p.notes||'—')}</span></div>
-  `;
-}
-
-// ── EXPORT STL (ASCII) ────────────────────────
-function exportModel() {
-  if (!modelGroup || modelGroup.children.length === 0) {
-    showToast('No model to export — generate a blueprint first'); return;
-  }
-  let stl = 'solid blueprint_model\n';
-  modelGroup.traverse(obj => {
-    if (!obj.isMesh) return;
-    const geo = obj.geometry.clone();
-    geo.applyMatrix4(obj.matrixWorld);
-    const pos = geo.attributes.position;
-    const idx = geo.index;
-    const writeTriangle = (a,b,c) => {
-      const ax=pos.getX(a),ay=pos.getY(a),az=pos.getZ(a);
-      const bx=pos.getX(b),by=pos.getY(b),bz=pos.getZ(b);
-      const cx=pos.getX(c),cy=pos.getY(c),cz=pos.getZ(c);
-      stl += `  facet normal 0 0 0\n    outer loop\n`;
-      stl += `      vertex ${ax.toFixed(6)} ${ay.toFixed(6)} ${az.toFixed(6)}\n`;
-      stl += `      vertex ${bx.toFixed(6)} ${by.toFixed(6)} ${bz.toFixed(6)}\n`;
-      stl += `      vertex ${cx.toFixed(6)} ${cy.toFixed(6)} ${cz.toFixed(6)}\n`;
-      stl += `    endloop\n  endfacet\n`;
-    };
-    if (idx) { for(let i=0;i<idx.count;i+=3) writeTriangle(idx.getX(i),idx.getX(i+1),idx.getX(i+2)); }
-    else { for(let i=0;i<pos.count;i+=3) writeTriangle(i,i+1,i+2); }
-  });
-  stl += 'endsolid blueprint_model\n';
-  const blob = new Blob([stl], { type:'text/plain' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'blueprint_model.stl';
-  a.click(); URL.revokeObjectURL(url);
-  showToast('STL exported ✓');
-}
-
-// ── HELPERS ───────────────────────────────────
-function esc(s) {
-  if (!s) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-let loadingInterval;
-function animateLoadingSteps(steps) {
-  let i = 0;
-  const el = document.getElementById('loading-step');
-  el.textContent = steps[0];
-  loadingInterval = setInterval(() => {
-    i = (i + 1) % steps.length;
-    el.textContent = steps[i];
-  }, 1400);
-}
-function showLoading(show) {
-  document.getElementById('loading-overlay').classList.toggle('active', show);
-  if (!show) clearInterval(loadingInterval);
-}
-
-let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
-}
-
-// ── INIT ──────────────────────────────────────
-initThree();
-
-// Allow pressing Enter+Ctrl/Cmd to generate
-document.getElementById('project-input').addEventListener('keydown', e => {
-  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') generateBlueprint();
-});
+  document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
+  render();
 </script>
-
 </body>
 </html>
